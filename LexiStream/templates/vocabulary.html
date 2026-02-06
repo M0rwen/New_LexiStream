@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Vocabulary Bank - LexiStream{% endblock %}
+
+{% block content %}
+<div class="vocabulary-container">
+    <h1 class="page-title"><i class="fas fa-bookmark"></i> Vocabulary Bank</h1>
+    
+    <div class="vocab-form-section">
+        <h2>Add New Word</h2>
+        <form method="POST" action="{{ url_for('add_vocabulary') }}" class="vocab-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="word">Word *</label>
+                    <input type="text" id="word" name="word" required>
+                </div>
+                <div class="form-group">
+                    <label for="phonetic">Phonetic</label>
+                    <input type="text" id="phonetic" name="phonetic" placeholder="e.g., /ˈwɜrd/">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="definition">Definition</label>
+                <textarea id="definition" name="definition" rows="2" placeholder="Enter the definition..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Pronunciation tips, usage examples, etc..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add to Vocabulary Bank
+            </button>
+        </form>
+    </div>
+
+    <div class="vocabulary-list-section">
+        <h2>My Vocabulary ({{ words|length }} words)</h2>
+        {% if words %}
+        <div class="vocabulary-grid">
+            {% for word in words %}
+            <div class="vocab-card">
+                <div class="vocab-header">
+                    <h3>{{ word.word }}</h3>
+                    <a href="{{ url_for('delete_vocabulary', vocab_id=word.id) }}" 
+                       class="delete-btn" onclick="return confirm('Delete this word?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+                {% if word.phonetic %}
+                <p class="vocab-phonetic">{{ word.phonetic }}</p>
+                {% endif %}
+                {% if word.definition %}
+                <p class="vocab-definition">{{ word.definition }}</p>
+                {% endif %}
+                {% if word.notes %}
+                <p class="vocab-notes"><em>{{ word.notes }}</em></p>
+                {% endif %}
+                <span class="vocab-date">Added {{ word.created_at.strftime('%B %d, %Y') }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-book"></i>
+            <h3>Your vocabulary bank is empty</h3>
+            <p>Start adding words you struggle with to track your learning!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,269 @@
+================================================================================
+          LEXISTREAM BACKEND NOTES / HANDOFF GUIDE
+================================================================================
+
+This document is for the next backend developer who continues this project.
+It summarizes the current architecture, important decisions, and logical
+next steps to extend or harden the system.
+
+================================================================================
+1. TECH STACK OVERVIEW
+================================================================================
+
+- Language: Python 3
+- Framework: Flask
+- ORM: Flask-SQLAlchemy
+- Auth: Flask-Login
+- DB:
+  - Default: SQLite file `lexistream.db`
+  - Optional: MySQL via SQLAlchemy + PyMySQL
+- Frontend: Jinja2 templates, vanilla JS, Chart.js for charts
+- Speech: `SpeechRecognition` + Google Web Speech API (free, no explicit key)
+- Audio processing: `pydub` (FFmpeg recommended on host system)
+
+Key files:
+- `app.py`              : Main Flask app, models, routes
+- `api_keys/config.py`  : Config (secret key, DB URI, upload config)
+- `templates/`          : All views (user + admin + profile)
+- `static/css/style.css`: Global styles
+- `static/js/main.js`   : Global UI behavior + animations
+- `static/js/recorder.js`: Browser recording / media handling
+
+Helper docs for non-devs:
+- `HOW_TO_RUN.txt`
+- `DATABASE_MYSQL_SETUP.txt`
+- `TRANSCRIPT_HELP.txt`
+- `ADMIN_CREDENTIALS.txt`
+
+================================================================================
+2. DATABASE MODEL SUMMARY
+================================================================================
+
+Defined in `app.py` using SQLAlchemy:
+
+- `User`
+  - `id` (PK, int)
+  - `username` (str, unique, required)
+  - `email` (str, unique, required)
+  - `password_hash` (str, required)
+  - `is_admin` (bool, default False)
+  - `display_name` (str, nullable)
+  - `bio` (text, nullable)
+  - `location` (str, nullable)
+  - `website` (str, nullable)
+  - `avatar_url` (str, nullable)
+  - `created_at` (datetime)
+
+- `Recording`
+  - `id` (PK)
+  - `user_id` (FK -> user.id)
+  - `filename`
+  - `transcript` (text)
+  - `words_per_minute` (float)
+  - `duration_seconds` (float)
+  - `created_at` (datetime)
+
+- `Lesson`
+  - `id`, `title`, `content`, `difficulty`, `created_at`
+
+- `Progress`
+  - `id`, `user_id`, `recording_id`, `words_per_minute`, `date`
+
+- `Review`
+  - `id`, `recording_id`, `reviewer_id`, `feedback_text`, `created_at`
+
+- `Vocabulary`
+  - `id`, `user_id`, `word`, `phonetic`, `definition`, `notes`, `created_at`
+
+- `Goal`
+  - `id`, `user_id`, `daily_minutes`, `current_streak`, `last_activity_date`, `created_at`
+
+Schema upgrades are handled in `ensure_schema_upgrades()` which:
+- Checks existing columns on `user` via SQLAlchemy’s inspector.
+- Adds missing columns (`is_admin`, `display_name`, `bio`, `location`,
+  `website`, `avatar_url`) using `ALTER TABLE` statements.
+
+This is intentionally lightweight and works for SQLite and MySQL.
+
+================================================================================
+3. AUTH / ROLES
+================================================================================
+
+- Uses Flask-Login:
+  - `login_user`, `logout_user`, `current_user`, `@login_required`.
+
+- Roles:
+  - `User.is_admin` boolean.
+  - `admin_required` decorator in `app.py`:
+    - Redirects with flash if not admin.
+
+- Admin-only routes:
+  - `/admin/dashboard`
+  - `/admin/lessons`, `/admin/lessons/add`, `/admin/lessons/edit/<id>`, `/admin/lessons/delete/<id>`
+  - `/admin/users`, `/admin/users/edit/<id>`, `/admin/users/delete/<id>`
+  - `/admin/recordings`, `/admin/recordings/delete/<id>`
+
+Registration constraints (enforced server- and client-side):
+- Username: 7–15 characters, unique.
+- Email: >= 8 characters, must contain `@` and `.`, unique.
+- Password: >= 7 characters.
+
+================================================================================
+4. NEW PROFILE FEATURE (GITHUB-LIKE CUSTOMIZATION)
+================================================================================
+
+Routes in `app.py`:
+- `/profile` (GET, `login_required`)
+  - Shows current_user’s profile with:
+    - Avatar (URL or initial)
+    - Display name / username / email
+    - Bio, location, website
+    - Simple stats: total recordings, vocabulary words, reviews given
+
+- `/profile/edit` (GET/POST, `login_required`)
+  - Editable fields:
+    - `display_name` (max 120)
+    - `bio` (text)
+    - `location` (max 120)
+    - `website` (URL, max 255)
+    - `avatar_url` (URL, max 255)
+
+Templates:
+- `templates/profile.html`
+- `templates/profile_edit.html`
+
+Navigation:
+- Top-right nav includes a “Profile” link for authenticated users.
+
+NOTE: There is no separate “public profile URL” yet (e.g. `/u/<username>`),
+but this would be a natural next step.
+
+================================================================================
+5. HOW MYSQL INTEGRATION WORKS
+================================================================================
+
+Config: `api_keys/config.py`
+
+- Default:
+  - `SQLALCHEMY_DATABASE_URI = "sqlite:///lexistream.db"`
+
+- MySQL override via env vars:
+  - `LEXISTREAM_USE_MYSQL=1`
+  - `LEXISTREAM_MYSQL_URI=mysql+pymysql://lexi_user:lexi_password@localhost/lexistream`
+
+App startup flows:
+1. `db.create_all()` – creates tables if missing (no ALTERs).
+2. `ensure_schema_upgrades()` – adds missing columns on `user`.
+3. `init_database()` – seeds admin user and sample lessons.
+
+See `DATABASE_MYSQL_SETUP.txt` for exact SQL commands and env examples.
+
+================================================================================
+6. AREAS FOR IMPROVEMENT / TODOs
+================================================================================
+
+This project is solid for a course project, but a production-ready system
+would benefit from:
+
+1) **Unit & Integration Tests**
+   - Use `pytest` + `pytest-flask`.
+   - Cover:
+     - Auth (login, logout, registration validation)
+     - Recording upload flow (mock audio + transcribe function)
+     - Admin CRUD routes (lessons, users, recordings)
+     - Profile edit / view
+
+2) **Better Error Handling**
+   - Central error pages: 404, 500 templates.
+   - Wrap transcription calls with clearer error codes (for API limits).
+   - Log errors to file (or a service) instead of only printing.
+
+3) **Public Profiles**
+   - Add route: `/u/<username>` to view a read-only profile:
+     - Avoid exposing email.
+     - Show display name, bio, location, website, high-level stats.
+   - Option: “Make profile public” toggle in settings.
+
+4) **Recording Storage Improvements**
+   - Currently: stores files in `uploads/recordings`.
+   - For scaling:
+     - Store on cloud (S3, GCS) and keep only URLs in DB.
+     - Add cleanup scripts for orphaned files.
+
+5) **Lesson Management Enhancements**
+   - Tagging / categories in addition to difficulty.
+   - Search + filter.
+   - “Pinned” or recommended lessons based on performance.
+
+6) **Analytics / Reporting**
+   - Expand `Progress` to store additional metrics (accuracy scores, etc.).
+   - Add admin reports: active users, average WPM per week, etc.
+
+7) **Security / Hardening**
+   - CSRF protection (`Flask-WTF` or custom token).
+   - Rate limiting on login to prevent brute-force attacks.
+   - Optional: password reset flow with email (currently no email integration).
+
+8) **Refactoring / Structure**
+   - Split `app.py` into:
+     - `models.py`
+     - `routes_public.py`, `routes_user.py`, `routes_admin.py`
+     - `services/transcription.py`, `services/progress.py`
+   - Register blueprints for admin vs user vs public.
+
+9) **Config Management**
+   - Move secrets and settings to `.env` using `python-dotenv`.
+   - Example keys:
+     - `FLASK_ENV`, `SECRET_KEY`, `LEXISTREAM_USE_MYSQL`, `LEXISTREAM_MYSQL_URI`.
+
+================================================================================
+7. DEV WORKFLOW TIPS
+================================================================================
+
+- Create and use a virtualenv:
+  - `python -m venv .venv`
+  - `.\.venv\Scripts\activate`
+  - `pip install -r requirements.txt`
+
+- For schema experimentation:
+  - Use a separate dev DB (e.g. `lexistream_dev`) or a separate SQLite file.
+  - Test migrations with both SQLite and MySQL if you plan to support both.
+
+- For front-end tweaks:
+  - Most UI lives in:
+    - `templates/base.html`
+    - `static/css/style.css`
+    - `templates/dashboard.html`, `templates/admin/dashboard.html`
+
+================================================================================
+8. QUICK ROUTE INDEX
+================================================================================
+
+Public:
+- `/`                     – Landing page
+- `/register`            – Register
+- `/login`               – Login
+
+User (login required):
+- `/dashboard`           – User dashboard
+- `/record`              – Recording hub
+- `/recordings`          – My recordings
+- `/lessons`             – Lessons browser
+- `/progress`            – Progress chart
+- `/reviews`             – Peer review listing
+- `/review/<id>`         – Review detail
+- `/vocabulary`          – Vocabulary bank
+- `/goals`               – Goal tracker
+- `/profile`             – View own profile
+- `/profile/edit`        – Edit own profile
+
+Admin (login + is_admin):
+- `/admin/dashboard`
+- `/admin/lessons`, `/admin/lessons/add`, `/admin/lessons/edit/<id>`, `/admin/lessons/delete/<id>`
+- `/admin/users`, `/admin/users/edit/<id>`, `/admin/users/delete/<id>`
+- `/admin/recordings`, `/admin/recordings/delete/<id>`
+
+================================================================================
+End of BACKEND_NOTES
+================================================================================
+

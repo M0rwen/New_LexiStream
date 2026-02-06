@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Progress - LexiStream{% endblock %}
+
+{% block content %}
+<div class="progress-container">
+    <h1 class="page-title"><i class="fas fa-chart-line"></i> Progress Dashboard</h1>
+    
+    <div class="chart-container">
+        <canvas id="progressChart"></canvas>
+    </div>
+
+    {% if chart_data.dates %}
+    <div class="progress-summary">
+        <h3>Progress Summary</h3>
+        <div class="summary-stats">
+            <div class="summary-item">
+                <span class="label">Total Sessions:</span>
+                <span class="value">{{ chart_data.dates|length }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Average WPM:</span>
+                <span class="value">{{ "%.1f"|format((chart_data.wpm|sum / chart_data.wpm|length) if chart_data.wpm|length > 0 else 0) }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Highest WPM:</span>
+                <span class="value">{{ chart_data.wpm|max if chart_data.wpm else 0 }}</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Lowest WPM:</span>
+                <span class="value">{{ chart_data.wpm|min if chart_data.wpm else 0 }}</span>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chart-line"></i>
+        <h3>No progress data yet</h3>
+        <p>Start recording to track your progress!</p>
+        <a href="{{ url_for('record') }}" class="btn btn-primary">Start Recording</a>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const chartData = {
+    labels: {{ chart_data.dates|tojson }},
+    datasets: [{
+        label: 'Words Per Minute',
+        data: {{ chart_data.wpm|tojson }},
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.1,
+        fill: true
+    }]
+};
+
+const ctx = document.getElementById('progressChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Reading Speed Over Time (WPM)'
+            },
+            legend: {
+                display: true
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Words Per Minute'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Date'
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

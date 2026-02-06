@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Lesson - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1 class="page-title"><i class="fas fa-edit"></i> Edit Lesson</h1>
+    
+    <div class="admin-form-card">
+        <form method="POST" action="{{ url_for('admin_edit_lesson', lesson_id=lesson.id) }}">
+            <div class="form-group">
+                <label for="title"><i class="fas fa-heading"></i> Lesson Title *</label>
+                <input type="text" id="title" name="title" value="{{ lesson.title }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="difficulty"><i class="fas fa-signal"></i> Difficulty Level *</label>
+                <select id="difficulty" name="difficulty" required>
+                    <option value="Easy" {% if lesson.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                    <option value="Medium" {% if lesson.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="Hard" {% if lesson.difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="content"><i class="fas fa-align-left"></i> Lesson Content *</label>
+                <textarea id="content" name="content" rows="10" required>{{ lesson.content }}</textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Lesson
+                </button>
+                <a href="{{ url_for('admin_lessons') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+</div>
+{% endblock %}

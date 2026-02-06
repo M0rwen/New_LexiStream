@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Add Lesson - Admin{% endblock %}
+{% block page_title %}Add New Lesson{% endblock %}
+
+{% block content %}
+<div class="card">
+        <form method="POST" action="{{ url_for('admin_add_lesson') }}">
+            <div class="form-group">
+                <label for="title"><i class="fas fa-heading"></i> Lesson Title *</label>
+                <input type="text" id="title" name="title" required 
+                       placeholder="Enter lesson title">
+            </div>
+
+            <div class="form-group">
+                <label for="difficulty"><i class="fas fa-signal"></i> Difficulty Level *</label>
+                <select id="difficulty" name="difficulty" required>
+                    <option value="">Select difficulty...</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="content"><i class="fas fa-align-left"></i> Lesson Content *</label>
+                <textarea id="content" name="content" rows="10" required 
+                          placeholder="Enter the lesson content here..."></textarea>
+                <small class="form-hint">Write the reading material for this lesson</small>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Lesson
+                </button>
+                <a href="{{ url_for('admin_lessons') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+</div>
+{% endblock %}
