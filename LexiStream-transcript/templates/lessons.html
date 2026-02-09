@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Lessons - LexiStream{% endblock %}
+
+{% block content %}
+<div class="lessons-container">
+    <h1 class="page-title"><i class="fas fa-book"></i> Personalized Lesson Plan</h1>
+    
+    <div class="filter-section">
+        <h3>Filter by Difficulty:</h3>
+        <div class="filter-buttons">
+            <a href="{{ url_for('lessons', difficulty='all') }}" 
+               class="filter-btn {% if current_difficulty == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('lessons', difficulty='Easy') }}" 
+               class="filter-btn {% if current_difficulty == 'Easy' %}active{% endif %}">Easy</a>
+            <a href="{{ url_for('lessons', difficulty='Medium') }}" 
+               class="filter-btn {% if current_difficulty == 'Medium' %}active{% endif %}">Medium</a>
+            <a href="{{ url_for('lessons', difficulty='Hard') }}" 
+               class="filter-btn {% if current_difficulty == 'Hard' %}active{% endif %}">Hard</a>
+        </div>
+    </div>
+
+    {% if lessons %}
+    <div class="lessons-grid">
+        {% for lesson in lessons %}
+        <div class="lesson-card">
+            <div class="lesson-difficulty difficulty-{{ lesson.difficulty.lower() }}">
+                {{ lesson.difficulty }}
+            </div>
+            <h3>{{ lesson.title }}</h3>
+            <div class="lesson-content">
+                <p>{{ lesson.content }}</p>
+            </div>
+            <div class="lesson-actions">
+                <button class="btn btn-primary" onclick="readAloud('{{ lesson.content|replace("'", "\\'") }}')">
+                    <i class="fas fa-volume-up"></i> Read Aloud
+                </button>
+                <a href="{{ url_for('record') }}" class="btn btn-secondary">
+                    <i class="fas fa-microphone"></i> Practice
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-book-open"></i>
+        <h3>No lessons found</h3>
+        <p>Lessons will appear here based on your selected difficulty level.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function readAloud(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert('Text-to-speech is not supported in your browser.');
+    }
+}
+</script>
+{% endblock %}

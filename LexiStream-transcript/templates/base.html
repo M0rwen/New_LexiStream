@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LexiStream{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="{% if current_user.is_authenticated %}{% if current_user.is_admin %}{{ url_for('admin_dashboard') }}{% else %}{{ url_for('dashboard') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}" class="nav-logo">
+                    <i class="fas fa-book-reader"></i>
+                    <span>LexiStream</span>
+                </a>
+            </div>
+            <div class="nav-center">
+                {% if current_user.is_authenticated %}
+                <ul class="nav-menu">
+                    {% if current_user.is_admin or current_user.role == 'admin' %}
+                    <li>
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                            <i class="fas fa-shield-alt"></i><span>Admin</span>
+                        </a>
+                    </li>
+                    {% elif current_user.role == 'teacher' %}
+                    <li>
+                        <a href="{{ url_for('teacher_dashboard') }}" class="nav-link {% if request.endpoint == 'teacher_dashboard' %}active{% endif %}">
+                            <i class="fas fa-chalkboard-teacher"></i><span>Teacher</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                            <i class="fas fa-home"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="{{ url_for('record') }}" class="nav-link {% if request.endpoint == 'record' %}active{% endif %}">
+                            <i class="fas fa-microphone"></i><span>Record</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('lessons') }}" class="nav-link {% if request.endpoint == 'lessons' %}active{% endif %}">
+                            <i class="fas fa-book-open"></i><span>Lessons</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('progress') }}" class="nav-link {% if request.endpoint == 'progress' %}active{% endif %}">
+                            <i class="fas fa-chart-line"></i><span>Progress</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('reviews') }}" class="nav-link {% if 'review' in request.endpoint %}active{% endif %}">
+                            <i class="fas fa-comments"></i><span>Reviews</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('vocabulary') }}" class="nav-link {% if request.endpoint == 'vocabulary' %}active{% endif %}">
+                            <i class="fas fa-bookmark"></i><span>Vocabulary</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('goals') }}" class="nav-link {% if request.endpoint == 'goals' %}active{% endif %}">
+                            <i class="fas fa-bullseye"></i><span>Goals</span>
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+            <div class="nav-right">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('profile') }}" class="nav-link" style="margin-right: 0.25rem;">
+                    <i class="fas fa-user"></i><span>Profile</span>
+                </a>
+                <span class="nav-user">
+                    <i class="fas fa-user-circle"></i>
+                    {{ current_user.username }}{% if current_user.is_admin %} (Admin){% endif %}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-secondary btn-sm">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    {% if current_user.is_authenticated %}
+    <button type="button" id="toggleCanvasBtn" class="canvas-toggle" title="Toggle dashboard">
+        <i class="fas fa-layer-group"></i>
+    </button>
+    {% endif %}
+
+    <main class="main-content">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 LexiStream - Intelligent Phonetic Analysis & Literacy Framework</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Recordings - Admin{% endblock %}
+{% block page_title %}Manage Recordings{% endblock %}
+
+{% block content %}
+{% if recordings %}
+<div class="table-container">
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>WPM</th>
+                    <th>Duration</th>
+                    <th>Transcript Preview</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recording in recordings %}
+                <tr>
+                    <td>{{ recording.id }}</td>
+                    <td><strong>{{ recording.user.username }}</strong></td>
+                    <td>{{ recording.words_per_minute }}</td>
+                    <td>{{ "%.1f"|format(recording.duration_seconds) }}s</td>
+                    <td>{{ recording.transcript[:50] if recording.transcript else 'N/A' }}{% if recording.transcript and recording.transcript|length > 50 %}...{% endif %}</td>
+                    <td>{{ recording.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="action-buttons">
+                        <a href="{{ url_for('admin_delete_recording', recording_id=recording.id) }}" 
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Are you sure you want to delete this recording?')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-microphone-slash"></i>
+        <h3>No recordings found</h3>
+    </div>
+    {% endif %}
+
+<a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary" style="margin-top: 1rem;">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+</a>
+{% endblock %}

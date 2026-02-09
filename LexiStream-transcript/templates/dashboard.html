@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - LexiStream{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-fire"></i></div>
+            <div class="stat-info">
+                <h3>{{ goal.current_streak }}</h3>
+                <p>Day Streak</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <h3>{{ today_minutes }} min</h3>
+                <p>Today's Practice</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+            <div class="stat-info">
+                <h3>{{ goal.daily_minutes }} min</h3>
+                <p>Daily Goal</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-microphone"></i></div>
+            <div class="stat-info">
+                <h3>{{ progress_data|length }}</h3>
+                <p>Total Recordings</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-grid">
+        <a href="{{ url_for('record') }}" class="action-card">
+            <i class="fas fa-microphone-alt"></i>
+            <h3>Start Recording</h3>
+            <p>Record a new reading exercise</p>
+        </a>
+        <a href="{{ url_for('lessons') }}" class="action-card">
+            <i class="fas fa-book-open"></i>
+            <h3>Browse Lessons</h3>
+            <p>Practice with reading materials</p>
+        </a>
+        <a href="{{ url_for('progress') }}" class="action-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>View Progress</h3>
+            <p>See your improvement over time</p>
+        </a>
+    </div>
+
+    {% if progress_data %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recent Activity</h2>
+        </div>
+        <div class="recent-list">
+            {% for progress in progress_data[:5] %}
+            <div class="recent-item">
+                <div>
+                    <strong>{{ progress.words_per_minute }} WPM</strong>
+                    <span style="display: block; color: var(--text-secondary); font-size: 0.9rem;">{{ progress.date.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

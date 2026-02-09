@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title"><i class="fas fa-user-edit"></i> Edit User</h2>
+    </div>
+    
+    <form method="POST" action="{{ url_for('admin_edit_user', user_id=user.id) }}">
+        <div class="form-group">
+            <label for="username">Username *</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}" required>
+            <span class="form-hint">Must be between 7-15 characters</span>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" value="{{ user.email }}" required>
+            <span class="form-hint">Must be at least 8 characters</span>
+        </div>
+
+        <div class="form-group">
+            <label>Role</label>
+            <div class="role-options">
+                <label>
+                    <input type="radio" name="role" value="user"
+                           {% if user.role == 'user' %}checked{% elif not user.is_admin and user.role is none %}checked{% endif %}>
+                    <span>User</span>
+                </label>
+                <label>
+                    <input type="radio" name="role" value="teacher"
+                           {% if user.role == 'teacher' %}checked{% endif %}>
+                    <span>Teacher</span>
+                </label>
+                <label>
+                    <input type="radio" name="role" value="admin"
+                           {% if user.role == 'admin' or user.is_admin %}checked{% endif %}>
+                    <span>Admin</span>
+                </label>
+            </div>
+            <span class="form-hint">Admin has full control. Teacher can manage lessons and review student work.</span>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update User
+            </button>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
