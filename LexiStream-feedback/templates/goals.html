@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Goals - LexiStream{% endblock %}
+
+{% block content %}
+<div class="goals-container">
+    <h1 class="page-title"><i class="fas fa-bullseye"></i> Goal Tracker</h1>
+    
+    <div class="goals-content">
+        <div class="goal-card">
+            <div class="goal-header">
+                <h2>Daily Practice Goal</h2>
+                <div class="streak-display">
+                    <i class="fas fa-fire"></i>
+                    <span class="streak-number">{{ goal.current_streak }}</span>
+                    <span class="streak-label">Day Streak!</span>
+                </div>
+            </div>
+
+            <div class="goal-progress">
+                <div class="progress-info">
+                    <span>Today's Progress: {{ today_minutes }} / {{ goal.daily_minutes }} minutes</span>
+                    <span class="progress-percent">
+                        {{ "%.0f"|format((today_minutes / goal.daily_minutes * 100) if goal.daily_minutes > 0 else 0) }}%
+                    </span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" 
+                         style="width: {{ ((today_minutes / goal.daily_minutes * 100) if goal.daily_minutes > 0 else 0)|round }}%"></div>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('goals') }}" class="goal-form">
+                <div class="form-group">
+                    <label for="daily_minutes">Daily Minutes Goal:</label>
+                    <input type="number" id="daily_minutes" name="daily_minutes" 
+                           value="{{ goal.daily_minutes }}" min="1" max="120" required>
+                    <span class="form-hint">Set how many minutes you want to practice each day</span>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Goal
+                </button>
+            </form>
+        </div>
+
+        <div class="goal-tips">
+            <h3><i class="fas fa-lightbulb"></i> Tips for Maintaining Your Streak</h3>
+            <ul>
+                <li>Practice at the same time each day to build a habit</li>
+                <li>Start with smaller goals and gradually increase</li>
+                <li>Use the lesson materials to guide your practice</li>
+                <li>Record your progress to see improvement over time</li>
+                <li>Don't worry if you miss a day - just start a new streak!</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

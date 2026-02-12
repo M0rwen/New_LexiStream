@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - LexiStream{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 900px; margin: 0 auto;">
+    <div class="card-header">
+        <h2 class="card-title"><i class="fas fa-user"></i> My Profile</h2>
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-pen"></i> Edit Profile
+        </a>
+    </div>
+
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <div style="flex: 0 0 180px; text-align: center;">
+            {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="Avatar"
+                 style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid var(--cream-border);">
+            {% else %}
+            <div style="width: 140px; height: 140px; border-radius: 50%; background: rgba(88,204,2,0.1);
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 3rem; font-weight: 700; color: var(--matcha-dark);
+                        border: 3px solid var(--cream-border); text-transform: uppercase;">
+                {{ (user.display_name or user.username)[:1] }}
+            </div>
+            {% endif %}
+            <div style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">
+                Member since {{ user.created_at.strftime('%B %Y') }}
+            </div>
+        </div>
+
+        <div style="flex: 1 1 300px;">
+            <h3 style="margin-bottom: 0.25rem;">
+                {{ user.display_name or user.username }}
+                {% if user.is_admin %}
+                <span class="badge badge-admin" style="margin-left: 0.5rem;">Admin</span>
+                {% endif %}
+            </h3>
+            <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                @{{ user.username }} &middot; {{ user.email }}
+            </div>
+
+            {% if user.bio %}
+            <div style="margin-bottom: 1rem;">
+                <strong>Bio</strong>
+                <p style="color: var(--text-secondary); white-space: pre-line;">{{ user.bio }}</p>
+            </div>
+            {% endif %}
+
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.95rem;">
+                {% if user.location %}
+                <div>
+                    <strong>Location</strong><br>
+                    <span style="color: var(--text-secondary);">{{ user.location }}</span>
+                </div>
+                {% endif %}
+
+                {% if user.website %}
+                <div>
+                    <strong>Website</strong><br>
+                    <a href="{{ user.website }}" target="_blank" rel="noopener"
+                       style="color: var(--matcha-dark); word-break: break-all;">
+                        {{ user.website }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <hr style="margin: 1.5rem 0; border-color: var(--cream-border);">
+
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.9rem;">
+                <div>
+                    <strong>Total Recordings</strong><br>
+                    <span style="color: var(--text-secondary);">{{ user.recordings|length }}</span>
+                </div>
+                <div>
+                    <strong>Vocabulary Words</strong><br>
+                    <span style="color: var(--text-secondary);">{{ user.vocabulary|length }}</span>
+                </div>
+                <div>
+                    <strong>Reviews Given</strong><br>
+                    <span style="color: var(--text-secondary);">{{ user.reviews_given|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

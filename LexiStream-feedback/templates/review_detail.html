@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Review Recording - LexiStream{% endblock %}
+
+{% block content %}
+<div class="review-detail-container">
+    <h1 class="page-title"><i class="fas fa-comment-dots"></i> Review Recording</h1>
+    
+    <div class="recording-detail-card">
+        <div class="recording-info">
+            <h3>Recording by {{ recording.user.username }}</h3>
+            <p class="recording-meta">
+                <i class="fas fa-calendar"></i> {{ recording.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                <span class="badge">{{ recording.words_per_minute }} WPM</span>
+            </p>
+            {% if recording.transcript %}
+            <div class="transcript-section">
+                <h4>Transcript:</h4>
+                <p>{{ recording.transcript }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="review-form-section">
+            <h3>Add Your Review</h3>
+            <form method="POST" action="{{ url_for('review_recording', recording_id=recording.id) }}">
+                <div class="form-group">
+                    <label for="feedback">Feedback:</label>
+                    <textarea id="feedback" name="feedback" rows="6" 
+                              placeholder="Provide constructive feedback on pronunciation, pace, clarity, etc..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit Review
+                </button>
+            </form>
+        </div>
+
+        {% if reviews %}
+        <div class="existing-reviews">
+            <h3>Existing Reviews ({{ reviews|length }})</h3>
+            {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-author">
+                    <i class="fas fa-user"></i> {{ review.reviewer.username }}
+                    <span class="review-date">{{ review.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                <p>{{ review.feedback_text }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('reviews') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Reviews
+    </a>
+</div>
+{% endblock %}

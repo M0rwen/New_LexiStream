@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+
+{% block content %}
+{% if users %}
+<div class="table-container">
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td><strong>{{ user.username }}</strong></td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.is_admin %}
+                        <span class="badge badge-admin">Admin</span>
+                        {% else %}
+                        <span class="badge badge-user">User</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="action-buttons">
+                        <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" 
+                           class="btn btn-sm btn-secondary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if not user.is_admin %}
+                        <a href="{{ url_for('admin_delete_user', user_id=user.id) }}" 
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Are you sure you want to delete user {{ user.username }}? This will delete all their data!')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                        {% else %}
+                        <span style="color: var(--text-light); font-size: 0.85rem;">Cannot delete admin</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <h3>No users found</h3>
+    </div>
+    {% endif %}
+
+<a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary" style="margin-top: 1rem;">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+</a>
+{% endblock %}

@@ -1,0 +1,122 @@
+================================================================================
+              LEXISTREAM - TRANSCRIPTION HELP GUIDE
+================================================================================
+
+If you see errors related to audio transcription (for example:
+"Transcription failed" or messages about audio or speech recognition),
+this guide explains what you can do to help fix or improve it.
+
+================================================================================
+1. COMMON CAUSES OF TRANSCRIPT ERRORS
+================================================================================
+
+1) No internet connection
+   - The app uses Google's free Web Speech API via the SpeechRecognition
+     Python library. This requires an active internet connection.
+
+2) Poor audio quality
+   - Loud background noise
+   - Microphone too far away
+   - Very low volume
+
+3) Audio format / codec issues
+   - The browser recording is converted to WAV using the pydub library.
+   - On some systems, pydub needs FFmpeg installed to read/convert audio.
+
+4) Service-side limitations
+   - The free Google Web Speech API sometimes fails due to rate limits
+     or temporary server-side problems.
+
+================================================================================
+2. WHAT YOU CAN DO TO HELP TRANSCRIPTION
+================================================================================
+
+STEP A: CHECK YOUR INTERNET
+---------------------------
+- Make sure you are connected to the internet.
+- Try opening any website in your browser to confirm.
+- If your internet drops, transcription will fail.
+
+STEP B: IMPROVE YOUR RECORDING ENVIRONMENT
+------------------------------------------
+- Find a quiet room (reduce TV, fans, and background noise).
+- Speak clearly and at a normal pace.
+- Keep the microphone at a consistent distance from your mouth.
+- Avoid covering the microphone with your hand or other objects.
+
+STEP C: INSTALL FFMPEG (IF NEEDED)
+----------------------------------
+If you see errors mentioning "FFmpeg", "decode", or audio file formats,
+you may need FFmpeg so that pydub can convert the audio properly.
+
+1) Download FFmpeg for Windows:
+   - Go to: https://ffmpeg.org/download.html
+   - Choose a Windows build (e.g., from gyan.dev or BtbN)
+
+2) Extract FFmpeg:
+   - Extract the folder (for example: C:\ffmpeg)
+
+3) Add FFmpeg to the PATH (simplest way):
+   - Press Win + R, type: sysdm.cpl  and press Enter
+   - Go to the "Advanced" tab > "Environment Variables..."
+   - In "System variables", find "Path" and click "Edit"
+   - Click "New" and add the path to ffmpeg\bin, e.g.:
+     C:\ffmpeg\bin
+   - Click OK on all dialogs to save
+
+4) Close and reopen Command Prompt
+   - Type: ffmpeg -version
+   - If you see version information, FFmpeg is installed correctly.
+
+LexiStream will now have a much easier time converting and reading audio.
+
+STEP D: TRY A SHORTER RECORDING
+-------------------------------
+- Very long recordings are harder to transcribe and more likely to fail.
+- Try recording 15–30 seconds to test if the system works.
+
+================================================================================
+3. UNDERSTANDING ERROR MESSAGES
+================================================================================
+
+You might see flash messages such as:
+
+- "Transcription error: Could not understand audio. Please speak more clearly."
+  -> The audio reached Google, but it couldn't clearly detect words.
+     Try again with clearer speech and less noise.
+
+- "Transcription error: Error with speech recognition service: ..."
+  -> Network or Google-side issue. Check internet and try later.
+
+- "Error processing audio: ..."
+  -> Problem reading or converting the audio file. FFmpeg and pydub setup
+     are the most common causes. Follow STEP C.
+
+If you see a specific error message in the terminal, you can:
+- Copy it
+- Save it in your documentation
+- Or share it with someone helping you debug
+
+================================================================================
+4. SUMMARY: YOUR CHECKLIST
+================================================================================
+
+1. Internet is ON and stable
+2. Quiet room, clear speech, good microphone position
+3. FFmpeg installed and on PATH (ffmpeg -version works)
+4. Try shorter test recordings first
+5. Re-run the app after making changes:
+   - Close the app (Ctrl + C in Command Prompt)
+   - Open a new Command Prompt
+   - cd "C:\JAMMIE CODING\LexiStream"
+   - py app.py
+
+================================================================================
+If you still see repeated transcript errors after all of this, note down:
+- The exact error message shown in LexiStream
+- Any extra error text in the Command Prompt
+- What you were trying to record (approx. length, language)
+
+This information is VERY helpful for debugging and for your project report.
+
+================================================================================

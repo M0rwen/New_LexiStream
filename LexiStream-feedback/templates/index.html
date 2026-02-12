@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - LexiStream{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">LexiStream</h1>
+            <p class="hero-subtitle">Intelligent Phonetic Analysis & Literacy Framework</p>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">Improve your reading and speaking skills with AI-powered feedback and personalized learning paths.</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started</a>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+            </div>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+        <div class="card">
+            <i class="fas fa-microphone-alt" style="font-size: 2.5rem; color: var(--matcha-dark); margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 0.5rem;">Speech Recording</h3>
+            <p style="color: var(--text-secondary);">Record and analyze your reading exercises</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--matcha-dark); margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 0.5rem;">Personalized Lessons</h3>
+            <p style="color: var(--text-secondary);">Learn at your own pace with difficulty levels</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: var(--matcha-dark); margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 0.5rem;">Progress Tracking</h3>
+            <p style="color: var(--text-secondary);">Monitor your words per minute over time</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-users" style="font-size: 2.5rem; color: var(--matcha-dark); margin-bottom: 1rem;"></i>
+            <h3 style="margin-bottom: 0.5rem;">Peer Reviews</h3>
+            <p style="color: var(--text-secondary);">Get feedback from teachers and peers</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

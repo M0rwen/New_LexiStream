@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - LexiStream{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-stats-grid">
+        <div class="admin-stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_users }}</h3>
+                <p>Total Users</p>
+            </div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="stat-icon"><i class="fas fa-microphone"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_recordings }}</h3>
+                <p>Total Recordings</p>
+            </div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="stat-icon"><i class="fas fa-book"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_lessons }}</h3>
+                <p>Total Lessons</p>
+            </div>
+        </div>
+        <div class="admin-stat-card">
+            <div class="stat-icon"><i class="fas fa-comments"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_reviews }}</h3>
+                <p>Total Reviews</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-grid">
+        <a href="{{ url_for('admin_lessons') }}" class="action-card">
+            <i class="fas fa-book-open"></i>
+            <h3>Manage Lessons</h3>
+            <p>Create, edit, or delete lessons</p>
+        </a>
+        <a href="{{ url_for('admin_users') }}" class="action-card">
+            <i class="fas fa-user-cog"></i>
+            <h3>Manage Users</h3>
+            <p>View and manage user accounts</p>
+        </a>
+        <a href="{{ url_for('admin_recordings') }}" class="action-card">
+            <i class="fas fa-file-audio"></i>
+            <h3>Manage Recordings</h3>
+            <p>View and manage all recordings</p>
+        </a>
+    </div>
+
+    <div class="recent-section">
+        <div class="card">
+            <h3><i class="fas fa-user-plus"></i> Recent Users</h3>
+            {% if recent_users %}
+            <div class="recent-list">
+                {% for user in recent_users %}
+                <div class="recent-item">
+                    <div class="recent-item-info">
+                        <strong>{{ user.username }}</strong>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <span class="recent-date">{{ user.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-message">No users yet</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-microphone-alt"></i> Recent Recordings</h3>
+            {% if recent_recordings %}
+            <div class="recent-list">
+                {% for recording in recent_recordings %}
+                <div class="recent-item">
+                    <div class="recent-item-info">
+                        <strong>{{ recording.user.username }}</strong>
+                        <span>{{ recording.words_per_minute }} WPM</span>
+                    </div>
+                    <span class="recent-date">{{ recording.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-message">No recordings yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

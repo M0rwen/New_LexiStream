@@ -1,0 +1,176 @@
+================================================================================
+      LEXISTREAM - MYSQL DATABASE SETUP GUIDE
+================================================================================
+
+This guide explains how to use MySQL instead of SQLite for LexiStream.
+
+By default, LexiStream uses SQLite (a simple file database). You ONLY need
+to follow this guide if you want to use MySQL.
+
+================================================================================
+1. DATABASE NAME AND TABLE OVERVIEW
+================================================================================
+
+RECOMMENDED DATABASE NAME:
+- Database: lexistream
+
+TABLES USED BY LEXISTREAM:
+- user
+- recording
+- lesson
+- progress
+- review
+- vocabulary
+- goal
+
+These tables are created automatically by the app when you run it with
+MySQL configured (you do NOT have to write CREATE TABLE statements).
+
+================================================================================
+2. CREATE DATABASE AND USER IN MYSQL
+================================================================================
+
+Open the MySQL command-line client (or any MySQL GUI) and run:
+
+1) Create the database:
+
+   CREATE DATABASE lexistream
+     CHARACTER SET utf8mb4
+     COLLATE utf8mb4_unicode_ci;
+
+2) Create a dedicated user for LexiStream:
+
+   CREATE USER 'lexi_user'@'localhost' IDENTIFIED BY 'lexi_password';
+
+   (You can choose any username/password you like, but remember them.)
+
+3) Grant permissions on the database to that user:
+
+   GRANT ALL PRIVILEGES ON lexistream.* TO 'lexi_user'@'localhost';
+   FLUSH PRIVILEGES;
+
+================================================================================
+3. CONNECTING LEXISTREAM TO MYSQL
+================================================================================
+
+LexiStream is already prepared to use MySQL via environment variables.
+
+IMPORTANT: Make sure you installed dependencies:
+- Run: pip install -r requirements.txt
+  (This also installs PyMySQL, which is needed for MySQL support.)
+
+Then, before running the app, set these environment variables in
+Command Prompt (Windows example):
+
+   cd "C:\JAMMIE CODING\LexiStream"
+
+   set LEXISTREAM_USE_MYSQL=1
+   set LEXISTREAM_MYSQL_URI=mysql+pymysql://lexi_user:lexi_password@localhost/lexistream
+
+Replace:
+- lexi_user     -> your MySQL username
+- lexi_password -> your MySQL password
+
+Now run the app:
+
+   py app.py
+
+On first run with MySQL enabled:
+- All required tables will be created automatically inside the
+  "lexistream" MySQL database.
+
+================================================================================
+4. TABLE SUMMARY (LOGICAL STRUCTURE)
+================================================================================
+
+You do NOT need to create these manually, but this helps you understand
+what exists in the database.
+
+1) user
+   - id (INT, primary key, auto-increment)
+   - username (VARCHAR)
+   - email (VARCHAR)
+   - password_hash (VARCHAR)
+   - is_admin (BOOLEAN / TINYINT)
+   - created_at (DATETIME)
+
+2) recording
+   - id (INT, primary key, auto-increment)
+   - user_id (INT, foreign key -> user.id)
+   - filename (VARCHAR)
+   - transcript (TEXT)
+   - words_per_minute (FLOAT)
+   - duration_seconds (FLOAT)
+   - created_at (DATETIME)
+
+3) lesson
+   - id (INT, primary key, auto-increment)
+   - title (VARCHAR)
+   - content (TEXT)
+   - difficulty (VARCHAR)  -- Easy / Medium / Hard
+   - created_at (DATETIME)
+
+4) progress
+   - id (INT, primary key, auto-increment)
+   - user_id (INT, foreign key -> user.id)
+   - recording_id (INT, foreign key -> recording.id, nullable)
+   - words_per_minute (FLOAT)
+   - date (DATETIME)
+
+5) review
+   - id (INT, primary key, auto-increment)
+   - recording_id (INT, foreign key -> recording.id)
+   - reviewer_id (INT, foreign key -> user.id)
+   - feedback_text (TEXT)
+   - created_at (DATETIME)
+
+6) vocabulary
+   - id (INT, primary key, auto-increment)
+   - user_id (INT, foreign key -> user.id)
+   - word (VARCHAR)
+   - phonetic (VARCHAR, nullable)
+   - definition (TEXT, nullable)
+   - notes (TEXT, nullable)
+   - created_at (DATETIME)
+
+7) goal
+   - id (INT, primary key, auto-increment)
+   - user_id (INT, foreign key -> user.id)
+   - daily_minutes (INT)
+   - current_streak (INT)
+   - last_activity_date (DATE, nullable)
+   - created_at (DATETIME)
+
+================================================================================
+5. SWITCHING BACK TO SQLITE (IF NEEDED)
+================================================================================
+
+If you ever want to go back to using the default SQLite file database:
+
+1. Close the app if it is running.
+2. Open a new Command Prompt.
+3. DO NOT set LEXISTREAM_USE_MYSQL (or set it to 0):
+
+   set LEXISTREAM_USE_MYSQL=0
+
+4. Run the app again:
+
+   py app.py
+
+Now the app will use the local SQLite file (lexistream.db) again.
+
+================================================================================
+6. NOTES
+================================================================================
+
+- Using SQLite is simplest for local testing and school projects.
+- MySQL is better when:
+  - Multiple users connect over a network
+  - You deploy to a server
+  - You want better performance and backup tools
+
+If you just need LexiStream for your research project on a single machine,
+SQLite is perfectly fine. Use MySQL only if your instructor or environment
+requires it.
+
+================================================================================

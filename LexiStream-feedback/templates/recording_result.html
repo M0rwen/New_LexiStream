@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Recording saved - LexiStream{% endblock %}
+
+{% block content %}
+<div class="recordings-container">
+    <h1 class="page-title"><i class="fas fa-check-circle"></i> Recording saved</h1>
+    <p class="result-subtitle">Here’s what you said and some feedback from your coach.</p>
+
+    <div class="recording-result-card">
+        <div class="recording-header">
+            <h3>Recording #{{ recording.id }}</h3>
+            <span class="recording-date">{{ recording.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+        </div>
+        <div class="recording-stats">
+            <div class="stat-badge">
+                <i class="fas fa-tachometer-alt"></i> {{ recording.words_per_minute }} WPM
+            </div>
+            <div class="stat-badge">
+                <i class="fas fa-clock"></i> {{ "%.1f"|format(recording.duration_seconds) }}s
+            </div>
+        </div>
+
+        <div class="result-section what-you-said">
+            <h4><i class="fas fa-quote-left"></i> What you said</h4>
+            <div class="result-content">
+                {% if recording.transcript %}
+                <p>{{ recording.transcript }}</p>
+                {% else %}
+                <p class="muted">No transcript available for this recording.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if recording.ai_feedback %}
+        <div class="result-section ai-feedback">
+            <h4><i class="fas fa-robot"></i> AI feedback</h4>
+            <div class="result-content ai-feedback-text">
+                <p>{{ recording.ai_feedback }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="result-section ai-feedback">
+            <h4><i class="fas fa-robot"></i> AI feedback</h4>
+            <div class="result-content">
+                <p class="muted">Feedback wasn’t generated for this recording. You can still see it in My Recordings.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="recording-actions">
+            <a href="{{ url_for('record') }}" class="btn btn-primary">
+                <i class="fas fa-microphone"></i> Record again
+            </a>
+            <a href="{{ url_for('recordings') }}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> My recordings
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

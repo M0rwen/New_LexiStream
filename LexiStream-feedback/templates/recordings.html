@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}My Recordings - LexiStream{% endblock %}
+
+{% block content %}
+<div class="recordings-container">
+    <h1 class="page-title"><i class="fas fa-list"></i> My Recordings</h1>
+    
+    {% if recordings %}
+    <div class="recordings-grid">
+        {% for recording in recordings %}
+        <div class="recording-card">
+            <div class="recording-header">
+                <h3>Recording #{{ recording.id }}</h3>
+                <span class="recording-date">{{ recording.created_at.strftime('%B %d, %Y') }}</span>
+            </div>
+            <div class="recording-stats">
+                <div class="stat-badge">
+                    <i class="fas fa-tachometer-alt"></i> {{ recording.words_per_minute }} WPM
+                </div>
+                <div class="stat-badge">
+                    <i class="fas fa-clock"></i> {{ "%.1f"|format(recording.duration_seconds) }}s
+                </div>
+            </div>
+            {% if recording.transcript %}
+            <div class="recording-transcript">
+                <p><strong>What you said:</strong></p>
+                <p>{{ recording.transcript }}</p>
+            </div>
+            {% endif %}
+            {% if recording.ai_feedback %}
+            <div class="recording-ai-feedback">
+                <p><strong><i class="fas fa-robot"></i> AI feedback:</strong></p>
+                <p>{{ recording.ai_feedback }}</p>
+            </div>
+            {% endif %}
+            <div class="recording-actions">
+                <a href="{{ url_for('recording_result', recording_id=recording.id) }}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-expand"></i> Details
+                </a>
+                <a href="{{ url_for('review_recording', recording_id=recording.id) }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-comment"></i> View Reviews
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-microphone-slash"></i>
+        <h3>No recordings yet</h3>
+        <p>Start by recording your first reading exercise!</p>
+        <a href="{{ url_for('record') }}" class="btn btn-primary">Start Recording</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

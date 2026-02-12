@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Peer Reviews - LexiStream{% endblock %}
+
+{% block content %}
+<div class="reviews-container">
+    <h1 class="page-title"><i class="fas fa-comments"></i> Social Peer-Review</h1>
+    
+    <div class="reviews-section">
+        <h2>Available Recordings for Review</h2>
+        {% if recordings %}
+        <div class="recordings-list">
+            {% for recording in recordings %}
+            <div class="review-item">
+                <div class="review-header">
+                    <div>
+                        <h4>Recording by {{ recording.user.username }}</h4>
+                        <span class="review-date">{{ recording.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                    </div>
+                    <div class="review-stats">
+                        <span class="badge">{{ recording.words_per_minute }} WPM</span>
+                    </div>
+                </div>
+                {% if recording.transcript %}
+                <div class="review-transcript">
+                    <p><strong>Transcript:</strong> {{ recording.transcript[:200] }}{% if recording.transcript|length > 200 %}...{% endif %}</p>
+                </div>
+                {% endif %}
+                <div class="review-actions">
+                    <a href="{{ url_for('review_recording', recording_id=recording.id) }}" class="btn btn-primary">
+                        <i class="fas fa-comment-dots"></i> Add Review
+                    </a>
+                    <span class="review-count">{{ recording.reviews|length }} review(s)</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-comments"></i>
+            <h3>No recordings available for review</h3>
+            <p>Recordings will appear here for peer review.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
