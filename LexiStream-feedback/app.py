@@ -126,7 +126,6 @@ def transcribe_audio(file_path):
             r = sr.Recognizer()
             with sr.AudioFile(temp_wav_path) as source:
                 # Adjust for ambient noise
-                r.adjust_for_ambient_noise(source)
                 audio_data = r.record(source)
             
             # Using Google Web Speech API (free, no key needed)
