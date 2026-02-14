@@ -45,6 +45,11 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ url_for('recordings') }}" class="nav-link {% if request.endpoint == 'recordings' %}active{% endif %}">
+                            <i class="fas fa-list"></i><span>My Recordings</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ url_for('lessons') }}" class="nav-link {% if request.endpoint == 'lessons' %}active{% endif %}">
                             <i class="fas fa-book-open"></i><span>Lessons</span>
                         </a>

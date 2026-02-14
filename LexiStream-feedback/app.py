@@ -18,6 +18,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+# <<< Add this line here to see which DB is active >>>
+print("ACTIVE DATABASE:", app.config['SQLALCHEMY_DATABASE_URI'])
+
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -154,32 +157,75 @@ def calculate_wpm(transcript, duration_seconds):
     wpm = (word_count / duration_seconds) * 60
     return round(wpm, 2)
 
-def get_ai_feedback(transcript):
-    """Get brief AI feedback on the user's speech/transcript using OpenAI. Returns None if no key or error."""
+import cohere
+
+client = cohere.ClientV2(api_key=COHERE_API_KEY)
+
+def get_ai_feedback(transcript: str) -> str:
     if not transcript or not transcript.strip():
-        return None
-    if not OPENAI_API_KEY:
-        return None
+        return "Your recording is noted! Try to maintain clarity and consistent pace."
+
+    if not COHERE_API_KEY:
+        return "Your recording is noted! Try to maintain clarity and consistent pace."
+
     try:
-        from openai import OpenAI
-        client = OpenAI(api_key=OPENAI_API_KEY)
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
+        import cohere
+        client = cohere.ClientV2(api_key=COHERE_API_KEY)
+
+        transcript_for_ai = (
+            "This is a language learning exercise. "
+            "The user read the following transcript aloud (some words may be repeated intentionally for practice):\n\n"
+            f"{transcript}"
+        )
+
+        response = client.chat(
+            model="command-r-plus-08-2024",
             messages=[
-                {"role": "system", "content": "You are a friendly language coach. In 2-4 short sentences, give encouraging feedback on what the learner said: note clarity, any grammar or word choice tips, and one thing they did well. Keep it brief and constructive."},
-                {"role": "user", "content": f"Here is what the learner said:\n\n{transcript}"}
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a friendly language coach. ALWAYS provide feedback, "
+                        "even if the transcript is short, repeated, or unclear. "
+                        "Give 2-3 short, constructive sentences focusing on clarity, pace, "
+                        "pronunciation, and effort."
+                    )
+                },
+                {"role": "user", "content": transcript_for_ai}
             ],
             max_tokens=200
         )
-        if response.choices and response.choices[0].message.content:
-            return response.choices[0].message.content.strip()
+
+        msg = getattr(response, "message", None)
+        if msg:
+            content = getattr(msg, "content", None)
+            if isinstance(content, list):
+                texts = [p.text for p in content if getattr(p, "text", None)]
+                ai_feedback = " ".join(texts).strip() if texts else None
+            elif hasattr(content, "text"):
+                ai_feedback = content.text.strip()
+            else:
+                ai_feedback = str(content).strip()
+        else:
+            ai_feedback = None
+
+        if not ai_feedback:
+            ai_feedback = (
+                "Good attempt! Focus on clear pronunciation and maintain a steady pace. "
+                "Keep practicing to improve fluency."
+            )
+
+        return ai_feedback
+
     except Exception as e:
-        print("OpenAI feedback error:", e)
-    return None
+        print("Cohere feedback error:", e)
+        return (
+            "Good attempt! Focus on clear pronunciation and maintain a steady pace. "
+            "Keep practicing to improve fluency."
+        )
 
 def ensure_schema_upgrades():
     """
-    Lightweight schema upgrade helper for SQLite.
+    Lightweight schema upgrade helper for MySQL.
 
     Flask-SQLAlchemy's db.create_all() will NOT alter existing tables.
     If the database already exists, we add missing columns here.
@@ -491,7 +537,21 @@ def record():
                 ai_feedback = get_ai_feedback(transcript)
                 if ai_feedback:
                     recording.ai_feedback = ai_feedback
-                    db.session.commit()
+                else:
+                    # Fallback feedback if AI did not return anything
+                    recording.ai_feedback = (
+                        "No AI feedback could be generated for this recording. "
+                        "Make sure your audio is clear and long enough (at least a few words)."
+                    )
+                db.session.commit()
+            else:
+                # Fallback feedback if transcript is empty
+                recording.ai_feedback = (
+                    "No transcript available, so no AI feedback could be generated. "
+                    "Try speaking more clearly or for longer."
+                )
+                db.session.commit()
+
 
             flash('Recording saved successfully!')
             return redirect(url_for('recording_result', recording_id=recording.id))

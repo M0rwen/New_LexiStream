@@ -26,13 +26,13 @@
                 <p>Daily Goal</p>
             </div>
         </div>
-        <div class="stat-card">
+        <a href="{{ url_for('recordings') }}" class="stat-card" style="text-decoration: none; color: inherit;">
             <div class="stat-icon"><i class="fas fa-microphone"></i></div>
             <div class="stat-info">
                 <h3>{{ progress_data|length }}</h3>
                 <p>Total Recordings</p>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="action-grid">
@@ -45,6 +45,11 @@
             <i class="fas fa-book-open"></i>
             <h3>Browse Lessons</h3>
             <p>Practice with reading materials</p>
+        </a>
+        <a href="{{ url_for('recordings') }}" class="action-card">
+            <i class="fas fa-list"></i>
+            <h3>My Recordings</h3>
+            <p>View and manage your recordings</p>
         </a>
         <a href="{{ url_for('progress') }}" class="action-card">
             <i class="fas fa-chart-line"></i>
